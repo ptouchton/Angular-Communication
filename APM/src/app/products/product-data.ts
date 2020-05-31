@@ -1,6 +1,7 @@
 import { InMemoryDbService } from 'angular-in-memory-web-api';
 
 import { IProduct } from './product';
+import { of } from 'rxjs';
 
 export class ProductData implements InMemoryDbService {
 
@@ -64,6 +65,6 @@ export class ProductData implements InMemoryDbService {
                 'category': 'Gaming',
             }
         ];
-        return { products };
+        return {  products };
     }
 }

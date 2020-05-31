@@ -13,7 +13,7 @@ export class CriteriaComponent implements OnInit, OnChanges, AfterViewInit {
   @Output() valueChange: EventEmitter<string> =
               new EventEmitter<string>();
 
-  @ViewChild('filterElement', { static: false }) filterElementRef: ElementRef;
+  @ViewChild('filterElement') filterElementRef: ElementRef;
 
   private _listFilter: string;
   get listFilter(): string {
