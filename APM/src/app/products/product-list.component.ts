@@ -3,14 +3,15 @@ import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { IProduct } from './product';
 import { ProductService } from './product.service';
 import { CriteriaComponent } from '../shared/criteria/criteria.component';
+import { ProductParameterService } from './product-parameter.service';
 
 @Component({
     templateUrl: './product-list.component.html',
     styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit, AfterViewInit {
+export class ProductListComponent implements OnInit {
     pageTitle = 'Product List';
-    showImage: boolean;
+
     includeDetail = true;
 
     imageWidth = 50;
@@ -19,15 +20,18 @@ export class ProductListComponent implements OnInit, AfterViewInit {
 
     filteredProducts: IProduct[];
     products: IProduct[];
-    parentListFilter: string;
-
-    @ViewChild('filterCriteria') filterCriteria: CriteriaComponent;
-
-    constructor(private productService: ProductService) { }
-
-    ngAfterViewInit(): void {
-        this.parentListFilter = this.filterCriteria.listFilter;
+    
+    public get showImage(): boolean {
+        return this.productParamService.showImage;
     }
+    public set showImage(value: boolean) {
+        this.productParamService.showImage = value;
+    }
+
+    @ViewChild(CriteriaComponent, {static: true, read: CriteriaComponent}) filterComponent: CriteriaComponent;
+
+    constructor(private productService: ProductService,
+                private productParamService: ProductParameterService) { }
 
     ngOnInit(): void {
 
@@ -35,7 +39,8 @@ export class ProductListComponent implements OnInit, AfterViewInit {
         this.productService.getProducts().subscribe(
             (products: IProduct[]) => {
                 this.products = products;
-                this.performFilter(this.parentListFilter);
+                this.filterComponent.listFilter =
+                   this.productParamService.filterBy;
             },
             (error: any) => this.errorMessage =  error as any
         );
@@ -43,6 +48,7 @@ export class ProductListComponent implements OnInit, AfterViewInit {
 
     onValueChange(value: string): void {
         this.performFilter(value);
+        this.productParamService.filterBy = value;
     }
 
     toggleImage(): void {
