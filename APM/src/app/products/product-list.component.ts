@@ -1,8 +1,8 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, ViewChildren, QueryList } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 
 import { IProduct } from './product';
 import { ProductService } from './product.service';
-import { NgModel } from '@angular/forms';
+import { CriteriaComponent } from '../shared/criteria/criteria.component';
 
 @Component({
     templateUrl: './product-list.component.html',
@@ -11,6 +11,7 @@ import { NgModel } from '@angular/forms';
 export class ProductListComponent implements OnInit, AfterViewInit {
     pageTitle = 'Product List';
     showImage: boolean;
+    includeDetail = true;
 
     imageWidth = 50;
     imageMargin = 2;
@@ -18,30 +19,30 @@ export class ProductListComponent implements OnInit, AfterViewInit {
 
     filteredProducts: IProduct[];
     products: IProduct[];
+    parentListFilter: string;
 
-    @ViewChild('filterElement') filterElementRef: ElementRef;
-    @ViewChild(NgModel) filterInput: NgModel;
-
-    listFilter: string;
+    @ViewChild('filterCriteria') filterCriteria: CriteriaComponent;
 
     constructor(private productService: ProductService) { }
 
+    ngAfterViewInit(): void {
+        this.parentListFilter = this.filterCriteria.listFilter;
+    }
+
     ngOnInit(): void {
+
+        // this.filterCriteria.listFilter
         this.productService.getProducts().subscribe(
             (products: IProduct[]) => {
                 this.products = products;
-                this.performFilter(this.listFilter);
+                this.performFilter(this.parentListFilter);
             },
             (error: any) => this.errorMessage =  error as any
         );
     }
 
-    ngAfterViewInit(): void {
-        this.filterInput.valueChanges.subscribe(
-           () => this.performFilter(this.listFilter)
-        );
-        this.filterElementRef.nativeElement.focus();
-
+    onValueChange(value: string): void {
+        this.performFilter(value);
     }
 
     toggleImage(): void {
