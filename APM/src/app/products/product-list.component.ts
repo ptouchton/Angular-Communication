@@ -20,7 +20,7 @@ export class ProductListComponent implements OnInit {
 
     filteredProducts: IProduct[];
     products: IProduct[];
-    
+
     public get showImage(): boolean {
         return this.productParamService.showImage;
     }
