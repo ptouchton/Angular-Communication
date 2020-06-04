@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 
-import { Observable, of, Subject, BehaviorSubject, throwError } from 'rxjs';
+import { Observable, of, BehaviorSubject, throwError } from 'rxjs';
 
 import { catchError, tap } from 'rxjs/operators';
 
@@ -13,9 +13,15 @@ import { IProduct } from './product';
 export class ProductService {
     private productsUrl = 'api/products';
     private products: IProduct[];
-    currentProduct: IProduct | null;
+
+    private selectedProductSource = new BehaviorSubject<IProduct | null>(null);
+    selectedProductChanges$ = this.selectedProductSource.asObservable();
 
     constructor(private http: HttpClient) { }
+
+    changeSelectedProduct(product: IProduct | null): void {
+        this.selectedProductSource.next(product);
+    }
 
     getProducts(): Observable<IProduct[]> {
         if (this.products) {
@@ -61,12 +67,12 @@ export class ProductService {
         const url = `${this.productsUrl}/${id}`;
         return this.http.delete<IProduct>(url, { headers: headers} )
                         .pipe(
-                            tap(data => console.log('deleteProduct: ' + id)),
-                            tap(data => {
+                            tap(() => console.log('deleteProduct: ' + id)),
+                            tap(() => {
                                 const foundIndex = this.products.findIndex(item => item.id === id);
                                 if (foundIndex > -1) {
                                     this.products.splice(foundIndex, 1);
-                                    this.currentProduct = null;
+                                    this.changeSelectedProduct(null);
                                 }
                             }),
                             catchError(this.handleError)
@@ -84,7 +90,7 @@ export class ProductService {
                                 if (this.products) {
                                     this.products.push(data);
                                 }
-                                this.currentProduct = data;
+                                this.changeSelectedProduct(data);
                             }),
                             catchError(this.handleError)
                         );
@@ -94,7 +100,7 @@ export class ProductService {
         const url = `${this.productsUrl}/${product.id}`;
         return this.http.put<IProduct>(url, product, { headers: headers} )
                         .pipe(
-                            tap(data => console.log('updateProduct: ' + product.id)),
+                            tap(() => console.log('updateProduct: ' + product.id)),
                             catchError(this.handleError)
                         );
     }
